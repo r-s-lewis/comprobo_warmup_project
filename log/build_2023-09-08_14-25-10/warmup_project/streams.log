@@ -1,0 +1,28 @@
+[0.353s] Invoking command in '/home/reuben/ros2_ws/src/mini_projects/warmup_project/build/warmup_project': PYTHONPATH=/home/reuben/ros2_ws/src/mini_projects/warmup_project/build/warmup_project/prefix_override:/home/reuben/ros2_ws/src/mini_projects/warmup_project/install/warmup_project/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 setup.py develop --editable --build-directory /home/reuben/ros2_ws/src/mini_projects/warmup_project/build/warmup_project/build --no-deps install_data
+[0.485s] running develop
+[0.488s] /usr/lib/python3/dist-packages/setuptools/command/easy_install.py:158: EasyInstallDeprecationWarning: easy_install command is deprecated. Use build and pip and other standards-based tools.
+[0.488s]   warnings.warn(
+[0.490s] /usr/lib/python3/dist-packages/setuptools/command/install.py:34: SetuptoolsDeprecationWarning: setup.py install is deprecated. Use build and pip and other standards-based tools.
+[0.490s]   warnings.warn(
+[0.566s] running egg_info
+[0.566s] creating warmup_project.egg-info
+[0.566s] writing warmup_project.egg-info/PKG-INFO
+[0.566s] writing dependency_links to warmup_project.egg-info/dependency_links.txt
+[0.566s] writing entry points to warmup_project.egg-info/entry_points.txt
+[0.566s] writing requirements to warmup_project.egg-info/requires.txt
+[0.566s] writing top-level names to warmup_project.egg-info/top_level.txt
+[0.566s] writing manifest file 'warmup_project.egg-info/SOURCES.txt'
+[0.567s] reading manifest file 'warmup_project.egg-info/SOURCES.txt'
+[0.567s] writing manifest file 'warmup_project.egg-info/SOURCES.txt'
+[0.568s] running build_ext
+[0.568s] Creating /home/reuben/ros2_ws/src/mini_projects/warmup_project/install/warmup_project/lib/python3.10/site-packages/warmup-project.egg-link (link to .)
+[0.568s] Installing teleop script to /home/reuben/ros2_ws/src/mini_projects/warmup_project/install/warmup_project/lib/warmup_project
+[0.569s] 
+[0.569s] Installed /home/reuben/ros2_ws/src/mini_projects/warmup_project/build/warmup_project
+[0.569s] running install_data
+[0.569s] creating /home/reuben/ros2_ws/src/mini_projects/warmup_project/install/warmup_project/share/ament_index
+[0.569s] creating /home/reuben/ros2_ws/src/mini_projects/warmup_project/install/warmup_project/share/ament_index/resource_index
+[0.569s] creating /home/reuben/ros2_ws/src/mini_projects/warmup_project/install/warmup_project/share/ament_index/resource_index/packages
+[0.569s] copying resource/warmup_project -> /home/reuben/ros2_ws/src/mini_projects/warmup_project/install/warmup_project/share/ament_index/resource_index/packages
+[0.569s] copying package.xml -> /home/reuben/ros2_ws/src/mini_projects/warmup_project/install/warmup_project/share/warmup_project
+[0.583s] Invoked command in '/home/reuben/ros2_ws/src/mini_projects/warmup_project/build/warmup_project' returned '0': PYTHONPATH=/home/reuben/ros2_ws/src/mini_projects/warmup_project/build/warmup_project/prefix_override:/home/reuben/ros2_ws/src/mini_projects/warmup_project/install/warmup_project/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 setup.py develop --editable --build-directory /home/reuben/ros2_ws/src/mini_projects/warmup_project/build/warmup_project/build --no-deps install_data

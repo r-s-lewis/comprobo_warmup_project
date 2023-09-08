@@ -1,0 +1,3 @@
+[console_scripts]
+teleop = warmup_project.teleop:main
+
