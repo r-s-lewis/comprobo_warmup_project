@@ -20,7 +20,8 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'teleop = warmup_project.teleop:main'
+            'teleop = warmup_project.teleop:main',
+            'obstacle_avoid = warmup_project.obstacle_avoid:main'
         ],
     },
 )
