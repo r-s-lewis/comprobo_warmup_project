@@ -21,7 +21,8 @@ setup(
     entry_points={
         'console_scripts': [
             'teleop = warmup_project.teleop:main',
-            'obstacle_avoid = warmup_project.obstacle_avoid:main'
+            'obstacle_avoid = warmup_project.obstacle_avoid:main',
+            'wall_follower = warmup_project.wall_follower:main'
         ],
     },
 )
