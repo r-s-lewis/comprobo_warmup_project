@@ -27,6 +27,8 @@ class WallFollowerNode(Node):
         self.wall_angle = None
         # is the robot parallel to the wall it wants to follow?
         self.parallel = False
+        # this is a bad idea
+        self.test_bullshit = 0
         # create subscriber to monitor bumps and publisher to send resultant vel
         self.sub = self.create_subscription(LaserScan, 'scan', self.process_laser, 10)
         self.vel_publisher = self.create_publisher(Twist, 'cmd_vel', 10)
@@ -40,7 +42,7 @@ class WallFollowerNode(Node):
         if not self.wall_distance:
             return
         # If you're too far from the wall, orient to face the wall and travel towards it
-        if self.wall_distance > self.follow_offset:
+        if self.wall_distance > self.follow_offset and not self.test_bullshit:
             # if you're not facing away from the wall, orient to face away (180)
             if not 180-self.variance<self.wall_angle<180+self.variance:
                 msg.angular.z = (self.wall_angle-180)/50 if self.wall_angle>180 else -(180-self.wall_angle)/50
@@ -54,14 +56,25 @@ class WallFollowerNode(Node):
                 print("approaching the wall")
         
         # LOGIC ABOVE THIS LINE WORKS
+        elif self.test_bullshit == 2:
+            ## lets see what happens here
+            msg.angular.z = 0.0
+            msg.linear.x = 0.1
+
+            
+
         else:
+            self.test_bullshit = 1
             # identify the closest perpendicular angle (270 or 90)
-            closest_perpendicular = (self.wall_angle > 180)*270 + (self.wall_angle < 180)*90
+            closest_perpendicular = (self.wall_angle >= 180)*270 + (self.wall_angle < 180)*90
+            msg.angular.z = .5 if closest_perpendicular == 90 else -.5
             # command the robot to make the wall angle perpendicular to the bot TODO: debug this!
-            msg.angular.z = (self.wall_angle-closest_perpendicular)/50 if self.wall_angle>closest_perpendicular else -(closest_perpendicular-self.wall_angle)/50
+            # msg.angular.z = (self.wall_angle-closest_perpendicular)/50 if self.wall_angle>closest_perpendicular else (closest_perpendicular-self.wall_angle)/50
             # msg.angular.z = 0.0 # this is an intentional overwrite bc previous line is broken
             # msg.angular.z = self.control_heading(self.wall_angle, closest_perpendicular)
-            msg.linear.x = 0.0
+            # msg.linear.x = 0.1
+            if abs(self.wall_angle - 90) <= 10 or abs(self.wall_angle - 270) <= 10:
+                self.test_bullshit = 2
             print(f"closest perpendicular {closest_perpendicular}")
         self.vel_publisher.publish(msg)
         # print(f"sending velocity {msg.linear.x}\nrotation {msg.angular.z}")
