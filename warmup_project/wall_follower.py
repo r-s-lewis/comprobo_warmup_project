@@ -18,7 +18,7 @@ import math
 class WallFollowerNode(Node):
     def __init__(self):
         super().__init__('wall_follower_node')
-        self.follow_offset = .3
+        self.follow_offset = .7
         self.variance = 2         # degrees of acceptable variance
         
         # is the robot close enough to the wall it wants to follow?
@@ -28,7 +28,6 @@ class WallFollowerNode(Node):
         # is the robot parallel to the wall it wants to follow?
         self.parallel = False
         # this is a bad idea
-        self.test_bullshit = 0
         # create subscriber to monitor bumps and publisher to send resultant vel
         self.sub = self.create_subscription(LaserScan, 'scan', self.process_laser, 10)
         self.vel_publisher = self.create_publisher(Twist, 'cmd_vel', 10)
@@ -39,15 +38,30 @@ class WallFollowerNode(Node):
         send velocity message based on bumper status
         """
         msg = Twist()
+        # don't run if you aren't initialized
         if not self.wall_distance:
             return
+        
+        # identify the closest perpendicular angle (270 or 90)
+        closest_perpendicular = (self.wall_angle >= 180)*270 + (self.wall_angle < 180)*90
+        if abs(self.wall_angle - closest_perpendicular) < self.variance:
+            self.parallel = True
+            print("\nPARALLEL")
+        else:
+            self.parallel = False
+            print("\nNOT PARALLEL")
+
+
         # If you're too far from the wall, orient to face the wall and travel towards it
-        if self.wall_distance > self.follow_offset and not self.test_bullshit:
+        if self.wall_distance > self.follow_offset:
             # if you're not facing away from the wall, orient to face away (180)
             if not 180-self.variance<self.wall_angle<180+self.variance:
-                msg.angular.z = (self.wall_angle-180)/50 if self.wall_angle>180 else -(180-self.wall_angle)/50
+
+                # make neato turn until nearest point directly behind (attempted proportional control)
+                proportional_turn = abs(self.wall_angle-180)/50
+                msg.angular.z = proportional_turn if self.wall_angle>180 else -proportional_turn
                 # msg.angular.z = self.control_heading(self.wall_angle, 180)
-                msg.linear.x = 0.0
+                msg.linear.x = -0.05
                 print("orienting to the wall")
             # once you've oriented, you can travel towards the wall
             else:
@@ -56,26 +70,24 @@ class WallFollowerNode(Node):
                 print("approaching the wall")
         
         # LOGIC ABOVE THIS LINE WORKS
-        elif self.test_bullshit == 2:
-            ## lets see what happens here
-            msg.angular.z = 0.0
-            msg.linear.x = 0.1
-
             
 
         else:
-            self.test_bullshit = 1
-            # identify the closest perpendicular angle (270 or 90)
-            closest_perpendicular = (self.wall_angle >= 180)*270 + (self.wall_angle < 180)*90
-            msg.angular.z = .5 if closest_perpendicular == 90 else -.5
-            # command the robot to make the wall angle perpendicular to the bot TODO: debug this!
-            # msg.angular.z = (self.wall_angle-closest_perpendicular)/50 if self.wall_angle>closest_perpendicular else (closest_perpendicular-self.wall_angle)/50
-            # msg.angular.z = 0.0 # this is an intentional overwrite bc previous line is broken
-            # msg.angular.z = self.control_heading(self.wall_angle, closest_perpendicular)
-            # msg.linear.x = 0.1
-            if abs(self.wall_angle - 90) <= 10 or abs(self.wall_angle - 270) <= 10:
-                self.test_bullshit = 2
-            print(f"closest perpendicular {closest_perpendicular}")
+            if self.parallel == True:
+                msg.angular.z = 0.0
+                msg.linear.x = 0.1
+            else:
+                msg.linear.x = 0.1
+                # make neato turn until nearest point is at its closest perpendicular vector
+                proportional_turn = abs(self.wall_angle - closest_perpendicular)/50
+                msg.angular.z = proportional_turn if self.wall_angle - closest_perpendicular > 0 else -proportional_turn
+                print(f"closest perpendicular {closest_perpendicular}")
+            # correct for too close to the wall
+            if self.wall_distance < self.follow_offset-.1:
+                proportional_turn = abs(self.follow_offset-self.wall_distance)/5
+                msg.angular.z += -proportional_turn if closest_perpendicular == 90 else proportional_turn
+                print("following too close, course correcting")
+
         self.vel_publisher.publish(msg)
         # print(f"sending velocity {msg.linear.x}\nrotation {msg.angular.z}")
 
@@ -93,6 +105,7 @@ class WallFollowerNode(Node):
         scale = 100
         angular_vel = (current_angle-goal_angle)/scale if current_angle>goal_angle else -(goal_angle-current_angle)/scale
         return angular_vel
+    
     def process_laser(self, msg:LaserScan):
         """
         process bump message and 
@@ -104,12 +117,8 @@ class WallFollowerNode(Node):
         # angle in degrees of the closest wall (detected point) to the neato
         self.wall_angle = valid_ranges.index(min(valid_ranges))
         self.wall_distance = min(valid_ranges)
-        print(f"closest wall at angle {self.wall_angle}\nclosest wall at distance {self.wall_distance}\n")
+        # print(f"closest wall at angle {self.wall_angle}\nclosest wall at distance {self.wall_distance}\n")
         
-        # right_sensor_values = statistics.mean([distance for distance in valid_ranges[0:90] if distance is not None])  
-        # left_sensor_values = statistics.mean([distance for distance in valid_ranges[270:360] if distance is not None])  
-        # self.turn_value = right_sensor_values - left_sensor_values
-        # print(self.wall_distance, self.turn_value)
 
 def main(args=None):
     rclpy.init(args=args)
