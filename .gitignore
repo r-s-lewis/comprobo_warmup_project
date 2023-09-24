@@ -1,0 +1,6 @@
+# ignore auto generated files
+build/
+install/
+log/
+resource/
+test/

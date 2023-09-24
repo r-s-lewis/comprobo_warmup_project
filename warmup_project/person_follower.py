@@ -78,13 +78,9 @@ class PersonFollower(Node):
                             else 2.0 for distance in msg.ranges]
         # angle in degrees of the closest wall (detected point) to the neato
         self.person_angle = valid_ranges.index(min(valid_ranges))
-        self.person_distance = min(valid_ranges)
+        self.person_distance = min(valid_ranges)    
         print(f"closest wall at angle {self.person_angle}\nclosest wall at distance {self.person_distance}\n")
         
-        # right_sensor_values = statistics.mean([distance for distance in valid_ranges[0:90] if distance is not None])  
-        # left_sensor_values = statistics.mean([distance for distance in valid_ranges[270:360] if distance is not None])  
-        # self.turn_value = right_sensor_values - left_sensor_values
-        # print(self.wall_distance, self.turn_value)
 
 def main(args=None):
     rclpy.init(args=args)
