@@ -4,3 +4,4 @@ install/
 log/
 resource/
 test/
+warmup_project/__pycache__

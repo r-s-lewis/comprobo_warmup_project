@@ -36,17 +36,18 @@ class ObstacleAvoidanceNode(Node):
         process bump message and 
         """
         msg.range_min
-        front_distance = msg.ranges[0]
         valid_ranges = [distance if \
                             msg.range_min <= distance <= msg.range_max \
-                            else None for distance in msg.ranges]
-        if valid_ranges[0] is not None and valid_ranges[0] < .5:
+                            else msg.range_max for distance in msg.ranges]
+        # take front sensors as frontmost 30 degrees of neato POV
+        front_distances = valid_ranges[345:360]+valid_ranges[0:15]
+        if min(front_distances) is not None and min(front_distances) < .5:
             self.front_obstacle = True
         else:
             self.front_obstacle = False
         
-        right_sensor_values = statistics.mean([distance for distance in valid_ranges[0:90] if distance is not None])  
-        left_sensor_values = statistics.mean([distance for distance in valid_ranges[270:360] if distance is not None])  
+        right_sensor_values = statistics.mean([distance if distance is not None else msg.range_max for distance in valid_ranges[0:90] ])  
+        left_sensor_values = statistics.mean([distance if distance is not None else msg.range_max for distance in valid_ranges[270:360]])  
         self.turn_value = right_sensor_values - left_sensor_values
         print(self.front_obstacle, self.turn_value)
 
