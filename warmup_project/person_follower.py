@@ -12,6 +12,7 @@ from std_msgs.msg import Header
 from geometry_msgs.msg import Twist
 from sensor_msgs.msg import LaserScan
 import statistics
+import numpy as np
 import math
 
 
@@ -20,6 +21,7 @@ class PersonFollower(Node):
         super().__init__('person_follower_node')
         self.follow_offset = .3
         self.variance = 2         # degrees of acceptable variance
+        self.second_deriv_threshold = .25
         
         self.person_distance = None 
         # angle between robot forward heading and person
@@ -75,12 +77,51 @@ class PersonFollower(Node):
         """
         valid_ranges = [distance if \
                             msg.range_min <= distance <= msg.range_max \
-                            else 2.0 for distance in msg.ranges]
-        # angle in degrees of the closest wall (detected point) to the neato
-        self.person_angle = valid_ranges.index(min(valid_ranges))
+                            else msg.range_max for distance in msg.ranges]
+        # find the change between each point of the scan. Add additional point to correct for reduction of array by 1 element
+        first_derivative = np.diff([valid_ranges[360]]+valid_ranges)
+        second_derivative = np.diff([first_derivative[360]]+first_derivative)
+        person_edges = np.array([angle for angle, value in enumerate(second_derivative) if value>self.second_deriv_threshold])
+        person_edges = np.concatenate([[0], person_edges, [360]])
+        print(person_edges)
+        closest_point = valid_ranges.index(min(valid_ranges))
         self.person_distance = min(valid_ranges)    
-        print(f"closest wall at angle {self.person_angle}\nclosest wall at distance {self.person_distance}\n")
+        self.person_angle = self.filtered_minimum(np.asarray(valid_ranges), second_derivative, person_edges, .001)
+        print(f"person detected at angle {self.person_angle}\nclosest wall at angle {closest_point}\n")
         
+    def filtered_minimum(self, laser_scan, second_derivative, section_indexes, threshold):
+        """
+        find the minimum distance in a "valid" section of a list recursively while filtering sections without second derivative variation
+
+        args:
+            laser_scan (np array of floats): 360 element list with floats of laser scans and out of range scans as max scan distance
+            second_derivative (list of floats): 360 element list with second derivatives of all degree measurements (between elements)
+            section_indexes (list of ints): indexes of the largest second derivative points pre-filtered to divide data
+            threshold (float): minimum threshold to apply to section's summed second derivatives
+
+        returns:
+            closest_valid_angle (int): index 0-360 of the closest valid point
+            closest_valid_distance (float): distance value for the closest valid point in meters 
+        """
+        # find index of minimum laser scan value of array
+        closest_point = np.argmin(laser_scan)
+        # find section bookends before and after the closest point
+        print(f"calculating section bookends with closest point {closest_point}")
+        section_start = section_indexes[section_indexes>closest_point].min()
+        section_end = section_indexes[section_indexes<closest_point].max()
+        
+        section = 
+        section_weight = sum([abs(point) for point in second_derivative[section_start:section_end]])#/(.1*(section_end-section_start))
+        if section_weight>threshold:
+            print(f"accepted minimum between {section_start} and {section_end} at {closest_point}!!!!!!!!!")
+            return closest_point
+        else:
+            print(f"rejected minimum between {section_start} and {section_end} with section weight {section_weight}")
+            # replace laser scan values in the invalid section with the max range detected
+            np.put(laser_scan, range(section_start, section_end+1), np.amax(laser_scan))
+            # TODO: BROKEN HERE fix this returning None
+            # recursively call function on the new filtered laser scan
+            self.filtered_minimum(laser_scan, second_derivative, section_indexes, threshold)
 
 def main(args=None):
     rclpy.init(args=args)
