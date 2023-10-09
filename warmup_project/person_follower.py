@@ -1,10 +1,5 @@
 """
-node to handle stopping robot when it experiences a bump
-
-takes closest point in laser scan, 
-if it is closer than the following distance (.5m) turns away and travels away until at .5m
-if it is farther than the following distance, turns towards the wall and travels until it reaches following distance
-once at following distance, 
+node to handle a robot following a person
 """
 import rclpy
 from rclpy.node import Node
@@ -110,7 +105,6 @@ class PersonFollower(Node):
         section_start = section_indexes[section_indexes>closest_point].min()
         section_end = section_indexes[section_indexes<closest_point].max()
         
-        section = 
         section_weight = sum([abs(point) for point in second_derivative[section_start:section_end]])#/(.1*(section_end-section_start))
         if section_weight>threshold:
             print(f"accepted minimum between {section_start} and {section_end} at {closest_point}!!!!!!!!!")

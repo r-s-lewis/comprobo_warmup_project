@@ -1,10 +1,5 @@
 """
-node to handle stopping robot when it experiences a bump
-
-takes closest point in laser scan, 
-if it is closer than the following distance (.5m) turns away and travels away until at .5m
-if it is farther than the following distance, turns towards the wall and travels until it reaches following distance
-once at following distance, 
+node to handle wall following
 """
 import rclpy
 from rclpy.node import Node

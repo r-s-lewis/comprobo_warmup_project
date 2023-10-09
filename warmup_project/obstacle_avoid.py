@@ -1,5 +1,5 @@
 """
-node to handle stopping robot when it experiences a bump
+node to handle robot obstacle avoidance
 """
 import rclpy
 from rclpy.node import Node
